@@ -59,6 +59,8 @@ contract Market {
 
         erc721.safeTransferFrom(address(this), seller, _tokenId);
 
+        removeOrder(_tokenId);
+
         emit OrderCancelled(seller, _tokenId);
     }
 
@@ -93,7 +95,7 @@ contract Market {
         return MAGIC_ON_ERC721_RECEIVED;
     }
 
-     function toUint256(
+    function toUint256(
         bytes memory _bytes,
         uint256 _start
     ) public pure returns (uint256) {
@@ -106,5 +108,17 @@ contract Market {
         }
 
         return tempUint;
+    }
+
+    function removeOrder(uint256 _tokenId) internal {
+        uint256 index = idToOrderIndex[_tokenId];
+        uint256 lastIndex = orders.length - 1;
+        if (index != lastIndex) {
+            Order storage lastOrder = orders[lastIndex];
+            orders[index] = lastOrder;
+            idToOrderIndex[lastOrder.tokenId] = index;
+        }
+        orders.pop();
+        delete orderOfId[_tokenId];
     }
 }
