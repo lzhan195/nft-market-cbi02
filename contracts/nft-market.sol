@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/interfaces/IERC721Receiver.sol";
 import "@openzeppelin/contracts/interfaces/IERC20.sol";
 import "@openzeppelin/contracts/interfaces/IERC721.sol";
 
-contract Market {
+contract Market is IERC721Receiver {
     IERC20 public erc20;
     IERC721 public erc721;
 
@@ -50,6 +50,8 @@ contract Market {
         );
         erc721.safeTransferFrom(address(this), buyer, _tokenId);
 
+        removeOrder(_tokenId);
+
         emit Deal(seller, buyer, _tokenId, price);
     }
 
@@ -75,6 +77,10 @@ contract Market {
         order.price = _price;
 
         emit PriceChanged(seller, _tokenId, previousPrice, _price);
+    }
+
+    function isListed(uint256 _tokenId) public view returns (bool) {
+        return orderOfId[_tokenId].seller != address(0);
     }
 
     function onERC721Received(
@@ -120,6 +126,7 @@ contract Market {
         }
         orders.pop();
         delete orderOfId[_tokenId];
+        delete idToOrderIndex[_tokenId];
     }
 
     function getOrderLength() external view returns (uint256) {
