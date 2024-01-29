@@ -121,4 +121,24 @@ contract Market {
         orders.pop();
         delete orderOfId[_tokenId];
     }
+
+    function getOrderLength() external view returns (uint256) {
+        return orders.length;
+    }
+
+    function getAllNFTs() external view returns (Order[] memory) {
+        return orders;
+    }
+
+    function getMyNFTs() external view returns (Order[] memory) {
+        Order[] memory myOrders = new Order[](orders.length);
+        uint256 count = 0;
+        for (uint256 i = 0; i < orders.length; i++) {
+            if (orders[i].seller == msg.sender) {
+                myOrders[count] = orders[i];
+                count++;
+            }
+        }
+        return myOrders;
+    }
 }
